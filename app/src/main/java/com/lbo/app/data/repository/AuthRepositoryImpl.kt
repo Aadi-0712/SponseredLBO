@@ -53,12 +53,17 @@ class AuthRepositoryImpl @Inject constructor(
             // or security rules), the user is created in Firebase Auth but will not have a
             // corresponding user document in Firestore. This will cause errors later in the app.
             // Consider using a Firebase Cloud Function triggered on user creation to reliably create the user document.
-            firestore.collection(Constants.COLLECTION_USERS)
-                .document(firebaseUser.uid)
-                .set(user.toMap())
-                .await()
-
-            Resource.Success(firebaseUser)
+            try {
+                firestore.collection(Constants.COLLECTION_USERS)
+                    .document(firebaseUser.uid)
+                    .set(user.toMap())
+                    .await()
+                Resource.Success(firebaseUser)
+            } catch (e: Exception) {
+                // Rollback: delete the auth user if choosing not to keep it in a broken state
+                firebaseUser.delete().await()
+                Resource.Error("Profile creation failed: ${e.message}. Deleted account for retry.")
+            }
         } catch (e: Exception) {
             Resource.Error(e.message ?: "Registration failed")
         }

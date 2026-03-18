@@ -14,9 +14,15 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class ProviderProfileState(
-    val user: User? = null,
+    val provider: User? = null,
     val isLoading: Boolean = false,
     val isSuccess: Boolean = false,
+    val error: String? = null
+)
+
+data class ProviderBookingsState(
+    val bookings: List<Booking> = emptyList(),
+    val isLoading: Boolean = false,
     val error: String? = null
 )
 
@@ -31,7 +37,7 @@ class ProviderViewModel @Inject constructor(
     private val _profileState = MutableStateFlow(ProviderProfileState())
     val profileState = _profileState.asStateFlow()
 
-    private val _bookingsState = MutableStateFlow<Resource<List<Booking>>>(Resource.Loading())
+    private val _bookingsState = MutableStateFlow(ProviderBookingsState())
     val bookingsState = _bookingsState.asStateFlow()
 
     init {
@@ -44,7 +50,7 @@ class ProviderViewModel @Inject constructor(
             _profileState.value = _profileState.value.copy(isLoading = true)
             when (val result = authRepository.getCurrentUserData()) {
                 is Resource.Success -> {
-                    _profileState.value = ProviderProfileState(user = result.data)
+                    _profileState.value = ProviderProfileState(provider = result.data)
                 }
                 is Resource.Error -> {
                     _profileState.value = _profileState.value.copy(isLoading = false, error = result.message)
@@ -56,7 +62,16 @@ class ProviderViewModel @Inject constructor(
 
     fun refreshBookings() {
         viewModelScope.launch {
-            _bookingsState.value = bookingRepository.getProviderBookings()
+            _bookingsState.value = _bookingsState.value.copy(isLoading = true)
+            when (val result = bookingRepository.getProviderBookings()) {
+                is Resource.Success -> {
+                    _bookingsState.value = ProviderBookingsState(bookings = result.data ?: emptyList())
+                }
+                is Resource.Error -> {
+                    _bookingsState.value = ProviderBookingsState(error = result.message)
+                }
+                is Resource.Loading -> {}
+            }
         }
     }
 
@@ -81,7 +96,7 @@ class ProviderViewModel @Inject constructor(
             
             val userId = authRepository.currentUser?.uid ?: return@launch
             
-            var imageUrl = _profileState.value.user?.profileImage ?: ""
+            var imageUrl = _profileState.value.provider?.profileImage ?: ""
             if (profileImageUri != null) {
                 val uploadResult = storageRepository.uploadProfileImage(userId, profileImageUri)
                 if (uploadResult is Resource.Success) {
@@ -92,7 +107,7 @@ class ProviderViewModel @Inject constructor(
             // Document upload logic could be more complex (list of URLs)
             // For now, assume repository handles singular or basic doc updates
             
-            val updatedUser = _profileState.value.user?.copy(
+            val updatedUser = _profileState.value.provider?.copy(
                 name = name,
                 role = User.ROLE_PROVIDER,
                 location = location,
@@ -108,7 +123,7 @@ class ProviderViewModel @Inject constructor(
 
             val result = providerRepository.updateProviderProfile(updatedUser)
             if (result is Resource.Success) {
-                _profileState.value = ProviderProfileState(user = updatedUser, isSuccess = true)
+                _profileState.value = ProviderProfileState(provider = updatedUser, isSuccess = true)
             } else {
                 _profileState.value = _profileState.value.copy(
                     isLoading = false,

@@ -19,7 +19,7 @@ android {
         versionName = "1.0.0"
 
         // Recommended: Load sensitive keys from local.properties
-        val localProperties = java.util.Properties()
+        val localProperties = java.util.Properties(
         val localPropertiesFile = rootProject.file("local.properties")
         if (localPropertiesFile.exists()) localProperties.load(localPropertiesFile.inputStream())
         buildConfigField("String", "WEB_CLIENT_ID", "\"${localProperties.getProperty("WEB_CLIENT_ID") ?: "YOUR_WEB_CLIENT_ID"}\"")
