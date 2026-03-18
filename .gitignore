@@ -1,0 +1,26 @@
+# Gradle
+.gradle/
+build/
+
+# Local configuration
+local.properties
+
+# Android Studio
+.idea/
+*.iml
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Kotlin
+*.kotlin_module
+
+# Generated files
+captures/
+
+# Firebase
+google-services.json
