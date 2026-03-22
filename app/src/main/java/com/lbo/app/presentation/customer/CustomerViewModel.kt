@@ -12,14 +12,14 @@ import javax.inject.Inject
 
 data class HomeState(
     val categories: List<Category> = emptyList(),
-    val topRatedProviders: List<User> = emptyList(),
+    val topRatedProviders: List<Provider> = emptyList(),
     val communityPosts: List<CommunityPost> = emptyList(),
     val isLoading: Boolean = false,
     val error: String? = null
 )
 
 data class SearchState(
-    val providers: List<User> = emptyList(),
+    val providers: List<Provider> = emptyList(),
     val isLoading: Boolean = false,
     val query: String = ""
 )
@@ -32,6 +32,7 @@ data class BookingFormState(
 
 @HiltViewModel
 class CustomerViewModel @Inject constructor(
+    private val authRepository: AuthRepository,
     private val providerRepository: ProviderRepository,
     private val categoryRepository: CategoryRepository,
     private val bookingRepository: BookingRepository,
@@ -45,13 +46,13 @@ class CustomerViewModel @Inject constructor(
     private val _searchState = MutableStateFlow(SearchState())
     val searchState = _searchState.asStateFlow()
 
-    private val _selectedProvider = MutableStateFlow<User?>(null)
+    private val _selectedProvider = MutableStateFlow<Provider?>(null)
     val selectedProvider = _selectedProvider.asStateFlow()
 
     private val _providerReviews = MutableStateFlow<List<Review>>(emptyList())
     val providerReviews = _providerReviews.asStateFlow()
 
-    private val _myBookingsState = MutableStateFlow<Resource<List<Booking>>>(Resource.Loading())
+    private val _myBookingsState = MutableStateFlow<Resource<List<Booking>>>(Resource.Loading)
     val myBookingsState = _myBookingsState.asStateFlow()
 
     private val _bookingFormState = MutableStateFlow(BookingFormState())
@@ -66,7 +67,7 @@ class CustomerViewModel @Inject constructor(
             _homeState.value = _homeState.value.copy(isLoading = true)
             
             // In a real app, use combine or zip to load concurrently
-            val cats = categoryRepository.getAllCategories()
+            val cats = categoryRepository.getCategories()
             val topProviders = providerRepository.getTopRatedProviders()
             val posts = communityRepository.getPosts()
 
@@ -93,7 +94,7 @@ class CustomerViewModel @Inject constructor(
     fun loadProviderDetails(providerId: String) {
         viewModelScope.launch {
             _selectedProvider.value = (providerRepository.getProvider(providerId) as? Resource.Success)?.data
-            _providerReviews.value = (reviewRepository.getReviewsForProvider(providerId) as? Resource.Success)?.data ?: emptyList()
+            _providerReviews.value = (reviewRepository.getReviewsByProvider(providerId) as? Resource.Success)?.data ?: emptyList()
         }
     }
 
@@ -123,7 +124,12 @@ class CustomerViewModel @Inject constructor(
 
     fun loadMyBookings() {
         viewModelScope.launch {
-            _myBookingsState.value = bookingRepository.getMyBookings()
+            val userId = authRepository.currentUser?.uid
+            if (userId != null) {
+                _myBookingsState.value = bookingRepository.getBookingsByCustomer(userId)
+            } else {
+                _myBookingsState.value = Resource.Error("User not logged in")
+            }
         }
     }
 
@@ -135,7 +141,7 @@ class CustomerViewModel @Inject constructor(
                 rating = rating,
                 comment = comment
             )
-            reviewRepository.submitReview(review)
+            reviewRepository.addReview(review)
             // Refresh details if needed
         }
     }

@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.lbo.app.data.model.Booking
+import com.lbo.app.data.model.Provider
 import com.lbo.app.presentation.components.*
 import com.lbo.app.presentation.customer.BookingCard
 import com.lbo.app.presentation.theme.*
@@ -31,7 +32,8 @@ fun ProviderDashboardScreen(
     onRejectBooking: (String) -> Unit,
     onCompleteBooking: (String) -> Unit
 ) {
-    val provider = profileState.provider
+    val user = profileState.provider
+    val provider = profileState.providerData
 
     Scaffold(
         topBar = {
@@ -53,7 +55,7 @@ fun ProviderDashboardScreen(
             }
         }
     ) { padding ->
-        if (provider == null) {
+        if (user == null) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -112,25 +114,25 @@ fun ProviderDashboardScreen(
                             ) {
                                 Column {
                                     Text(
-                                        provider.name,
+                                        user?.name ?: "Provider",
                                         style = MaterialTheme.typography.titleLarge,
                                         fontWeight = FontWeight.Bold
                                     )
                                     Text(
-                                        provider.category,
+                                        provider?.category ?: "",
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = MaterialTheme.colorScheme.primary
                                     )
                                 }
                                 Surface(
                                     shape = RoundedCornerShape(8.dp),
-                                    color = if (provider.isApproved) SuccessLight else WarningLight
+                                    color = if (provider?.isApproved == true) SuccessLight else WarningLight
                                 ) {
                                     Text(
-                                        if (provider.isApproved) "Approved" else "Pending",
+                                        text = if (provider?.isApproved == true) "Approved" else "Pending",
                                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
                                         style = MaterialTheme.typography.labelMedium,
-                                        color = if (provider.isApproved) Success else Warning
+                                        color = if (provider?.isApproved == true) Success else Warning
                                     )
                                 }
                             }
@@ -138,7 +140,7 @@ fun ProviderDashboardScreen(
                             Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                     Text(
-                                        String.format("%.1f", provider.rating),
+                                        String.format("%.1f", provider?.rating ?: 0.0),
                                         style = MaterialTheme.typography.headlineMedium,
                                         fontWeight = FontWeight.Bold
                                     )
@@ -147,7 +149,7 @@ fun ProviderDashboardScreen(
                                 }
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                     Text(
-                                        "${provider.totalReviews}",
+                                        "${provider?.totalReviews ?: 0}",
                                         style = MaterialTheme.typography.headlineMedium,
                                         fontWeight = FontWeight.Bold
                                     )

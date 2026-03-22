@@ -18,9 +18,6 @@ val GradientBlueEnd = Color(0xFF2C2C2C)   // Dark Gray
 val ErrorRed = Color(0xFFD32F2F)
 val ErrorLight = Color(0xFFFFEBEE)
 
-val SuccessGreen = Color(0xFF388E3C)
-val SuccessLight = Color(0xFFE8F5E9)
-
 val DarkGray = Color(0xFF212121)
 val LightGray = Color(0xFFF5F5F5)
 

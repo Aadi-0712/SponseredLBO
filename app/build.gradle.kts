@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -6,6 +8,11 @@ plugins {
     kotlin("kapt")
     id("org.jetbrains.kotlin.plugin.compose")
 }
+
+// Recommended: Load sensitive keys from local.properties
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) localProperties.load(localPropertiesFile.inputStream())
 
 android {
     namespace = "com.lbo.app"
@@ -18,11 +25,11 @@ android {
         versionCode = 1
         versionName = "1.0.0"
 
-        // Recommended: Load sensitive keys from local.properties
-        val localProperties = java.util.Properties(
-        val localPropertiesFile = rootProject.file("local.properties")
-        if (localPropertiesFile.exists()) localProperties.load(localPropertiesFile.inputStream())
-        buildConfigField("String", "WEB_CLIENT_ID", "\"${localProperties.getProperty("WEB_CLIENT_ID") ?: "YOUR_WEB_CLIENT_ID"}\"")
+        buildConfigField(
+            "String",
+            "WEB_CLIENT_ID",
+            "\"${localProperties.getProperty("WEB_CLIENT_ID") ?: "279422380753-2k0pson4usls3ijb1oibtbr5qonhtc53.apps.googleusercontent.com"}\""
+        )
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

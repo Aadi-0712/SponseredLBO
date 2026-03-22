@@ -10,13 +10,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.lbo.app.data.model.Review
-import com.lbo.app.data.model.User
+import com.lbo.app.data.model.Provider
 import com.lbo.app.presentation.components.LBOButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProviderDetailScreen(
-    provider: User?,
+    provider: Provider?,
     reviews: List<Review>,
     onBookNow: () -> Unit,
     onBack: () -> Unit

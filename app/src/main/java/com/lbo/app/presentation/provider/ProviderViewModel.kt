@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lbo.app.data.model.Booking
+import com.lbo.app.data.model.Provider
 import com.lbo.app.data.model.User
 import com.lbo.app.domain.repository.*
 import com.lbo.app.utils.Resource
@@ -15,6 +16,7 @@ import javax.inject.Inject
 
 data class ProviderProfileState(
     val provider: User? = null,
+    val providerData: Provider? = null,
     val isLoading: Boolean = false,
     val isSuccess: Boolean = false,
     val error: String? = null
@@ -29,6 +31,7 @@ data class ProviderBookingsState(
 @HiltViewModel
 class ProviderViewModel @Inject constructor(
     private val authRepository: AuthRepository,
+    private val userRepository: UserRepository,
     private val providerRepository: ProviderRepository,
     private val bookingRepository: BookingRepository,
     private val storageRepository: StorageRepository
@@ -50,7 +53,11 @@ class ProviderViewModel @Inject constructor(
             _profileState.value = _profileState.value.copy(isLoading = true)
             when (val result = authRepository.getCurrentUserData()) {
                 is Resource.Success -> {
-                    _profileState.value = ProviderProfileState(provider = result.data)
+                    val user = result.data
+                    // Also load the Provider record
+                    val providerResult = providerRepository.getProviderByUserId(user.userId)
+                    val provData = (providerResult as? Resource.Success)?.data
+                    _profileState.value = ProviderProfileState(provider = user, providerData = provData)
                 }
                 is Resource.Error -> {
                     _profileState.value = _profileState.value.copy(isLoading = false, error = result.message)
@@ -63,7 +70,12 @@ class ProviderViewModel @Inject constructor(
     fun refreshBookings() {
         viewModelScope.launch {
             _bookingsState.value = _bookingsState.value.copy(isLoading = true)
-            when (val result = bookingRepository.getProviderBookings()) {
+            val userId = authRepository.currentUser?.uid
+            if (userId == null) {
+                _bookingsState.value = ProviderBookingsState(error = "User not logged in")
+                return@launch
+            }
+            when (val result = bookingRepository.getBookingsByProvider(userId)) {
                 is Resource.Success -> {
                     _bookingsState.value = ProviderBookingsState(bookings = result.data ?: emptyList())
                 }
@@ -121,13 +133,26 @@ class ProviderViewModel @Inject constructor(
                 profileImage = imageUrl
             )
 
-            val result = providerRepository.updateProviderProfile(updatedUser)
-            if (result is Resource.Success) {
-                _profileState.value = ProviderProfileState(provider = updatedUser, isSuccess = true)
+            val provider = com.lbo.app.data.model.Provider(
+                providerId = userId,
+                userId = userId,
+                name = name,
+                category = category,
+                location = location,
+                description = description,
+                experience = experience.toIntOrNull() ?: 0,
+                profileImage = imageUrl
+            )
+
+            val userResult = userRepository.updateUser(updatedUser)
+            val providerResult = providerRepository.createProvider(provider)
+
+            if (userResult is Resource.Success && providerResult is Resource.Success) {
+                _profileState.value = ProviderProfileState(provider = updatedUser, providerData = provider, isSuccess = true)
             } else {
                 _profileState.value = _profileState.value.copy(
                     isLoading = false,
-                    error = (result as? Resource.Error)?.message ?: "Update failed"
+                    error = "Update failed"
                 )
             }
         }

@@ -79,7 +79,7 @@ fun HomeScreen(
 
                 items(homeState.topRatedProviders) { provider ->
                     Card(
-                        onClick = { onProviderClick(provider.userId) },
+                        onClick = { onProviderClick(provider.providerId) },
                         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
                     ) {
                         Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {

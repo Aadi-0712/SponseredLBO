@@ -9,14 +9,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.lbo.app.data.model.User
+import com.lbo.app.data.model.Provider
 import com.lbo.app.presentation.components.LBOButton
 import com.lbo.app.presentation.components.LBOTextField
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BookingScreen(
-    provider: User?,
+    provider: Provider?,
     bookingFormState: BookingFormState,
     onCreateBooking: (String, String, String, String, String) -> Unit,
     onBack: () -> Unit,
@@ -76,7 +76,7 @@ fun BookingScreen(
                 text = "Confirm Booking",
                 onClick = {
                     provider?.let {
-                        onCreateBooking(it.userId, it.name, it.role, date, time)
+                        onCreateBooking(it.providerId, it.name, it.category, date, time)
                     }
                 },
                 isLoading = bookingFormState.isLoading,

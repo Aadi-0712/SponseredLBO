@@ -53,7 +53,7 @@ fun AllBookingsScreen(
             }
 
             if (filteredBookings.isEmpty()) {
-                EmptyState(message = "No $selectedFilter bookings")
+                EmptyState(message = "No $selectedFilter bookings", icon = Icons.Default.Info)
             } else {
                 LazyColumn(
                     contentPadding = PaddingValues(16.dp),

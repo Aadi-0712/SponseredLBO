@@ -257,7 +257,7 @@ class ProviderRepositoryImpl @Inject constructor(
                 }
                 val snapshot = backupQuery.get().await()
                 val providers = snapshot.toObjects(Provider::class.java).map {
-                    ProviderSearchIndex(it.providerId, it.name, it.category, it.city, it.rating, it.experience)
+                    ProviderSearchIndex(it.providerId, it.name, it.category, it.location, it.rating, it.experience)
                 }
                 val nextDoc = if (snapshot.size() > 0) snapshot.documents[snapshot.size() - 1] else null
                 Resource.Success(Pair(providers, nextDoc))

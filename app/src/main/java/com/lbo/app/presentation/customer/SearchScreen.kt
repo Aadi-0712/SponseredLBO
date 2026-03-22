@@ -52,7 +52,7 @@ fun SearchScreen(
                 items(searchState.providers) { provider ->
                     // Assuming a ProviderCard exists or using a generic one
                     Card(
-                        onClick = { onProviderClick(provider.userId) },
+                        onClick = { onProviderClick(provider.providerId) },
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(Modifier.padding(16.dp)) {

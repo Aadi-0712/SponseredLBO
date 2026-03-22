@@ -23,9 +23,9 @@ fun ProviderProfileSetupScreen(
     onSaveProfile: (String, String, String, String, String, Uri?, List<Uri>) -> Unit,
     onBack: () -> Unit
 ) {
-    var name by remember { mutableStateOf(profileState.user?.name ?: "") }
+    var name by remember { mutableStateOf(profileState.provider?.name ?: "") }
     var category by remember { mutableStateOf("") } // Ideally a dropdown
-    var location by remember { mutableStateOf(profileState.user?.location ?: "") }
+    var location by remember { mutableStateOf(profileState.provider?.location ?: "") }
     var description by remember { mutableStateOf("") }
     var experience by remember { mutableStateOf("") }
     var profileImageUri by remember { mutableStateOf<Uri?>(null) }
